@@ -1,0 +1,16 @@
+{
+  "name": "sso-oidc-system",
+  "version": "1.0.0",
+  "description": "Secure Single Sign-On (SSO) System via OpenID Connect (OIDC)",
+  "main": "generate-certs.js",
+  "scripts": {
+    "certs": "node generate-certs.js",
+    "install-all": "npm install && npm install --prefix idp && npm install --prefix portal-a && npm install --prefix portal-b",
+    "dev": "concurrently \"npm run dev --prefix idp\" \"npm run dev --prefix portal-a\" \"npm run dev --prefix portal-b\"",
+    "verify": "node verify-sso.js"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "selfsigned": "^2.4.1"
+  }
+}
