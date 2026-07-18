@@ -57,7 +57,7 @@ export default function Sidebar({ currentPage, onNavigate }) {
                         <p className="user-role">{user.role === 'admin' ? '👑 Admin' : '👤 Employee'}</p>
                     </div>
                 </div>
-                <button id="logout-btn" className="logout-btn" onClick={() => { logoutUser(); window.location.href = 'https://localhost:5001/logout'; }}>
+                <button id="logout-btn" className="logout-btn" onClick={() => { logoutUser(); window.location.href = 'https://localhost:6030/logout'; }}>
                     🚪 Logout
                 </button>
             </div>

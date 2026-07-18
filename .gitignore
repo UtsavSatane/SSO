@@ -1,12 +1,12 @@
 # Dependencies
 node_modules/
-portal-a/node_modules/
+elms/node_modules/
 portal-b/node_modules/
 idp/node_modules/
 
 # Local databases and locks
-portal-a/server/elms.db
-portal-a/server/elms.db-journal
+elms/server/elms.db
+elms/server/elms.db-journal
 idp/jwks.json
 
 # Logs
@@ -18,6 +18,6 @@ certs/
 
 # Environment configs
 .env
-portal-a/.env
+elms/.env
 portal-b/.env
 idp/.env

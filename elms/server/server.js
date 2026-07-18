@@ -22,7 +22,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 6030;
 
 // Middleware
 app.use(cors());
@@ -30,8 +30,8 @@ app.use(express.json());
 
 // Session middleware for OIDC context
 app.use(session({
-  name: 'session_portal_a_oidc',
-  keys: ['portal-a-cookie-secret-key-999'],
+  name: 'session_elms_oidc',
+  keys: ['elms-cookie-secret-key-999'],
   maxAge: 10 * 60 * 1000 // 10 minutes
 }));
 
@@ -40,17 +40,17 @@ let client;
 async function initOIDC() {
   try {
     const idpIssuer = await Issuer.discover('https://localhost:5000');
-    console.log(`[Portal-A/ELMS] Discovered IdP at https://localhost:5000`);
+    console.log(`[ELMS] Discovered IdP at https://localhost:5000`);
     
     client = new idpIssuer.Client({
-      client_id: 'portal-a',
-      client_secret: 'portal-a-secret-999',
-      redirect_uris: ['https://localhost:5001/callback'],
-      post_logout_redirect_uris: ['https://localhost:5001/'],
+      client_id: 'elms',
+      client_secret: 'elms-secret-999',
+      redirect_uris: ['https://localhost:6030/callback'],
+      post_logout_redirect_uris: ['http://localhost:5001/'],
       response_types: ['code']
     });
   } catch (err) {
-    console.error('[Portal-A/ELMS] Failed to discover OpenID Connect Identity Provider. Retrying in 5 seconds...', err.message);
+    console.error('[ELMS] Failed to discover OpenID Connect Identity Provider. Retrying in 5 seconds...', err.message);
     setTimeout(initOIDC, 5000);
   }
 }
@@ -94,7 +94,7 @@ app.get('/callback', async (req, res) => {
     }
 
     const tokenSet = await client.callback(
-      'https://localhost:5001/callback',
+      'https://localhost:6030/callback',
       params,
       {
         state: oidcContext.state,
@@ -131,15 +131,11 @@ app.get('/callback', async (req, res) => {
     // Clear temporary OIDC context
     req.session.oidc = null;
 
-    // Send JS to store token in localStorage and redirect
-    res.send(`
-      <script>
-        localStorage.setItem('elms_token', '${token}');
-        window.location.href = '/';
-      </script>
-    `);
+    // Redirect to the frontend with the token as a query parameter
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5001';
+    res.redirect(`${frontendUrl}/?token=${token}`);
   } catch (err) {
-    console.error('[Portal-A/ELMS] Callback validation failed:', err);
+    console.error('[ELMS] Callback validation failed:', err);
     res.status(500).send(`Authentication failed: ${err.message}`);
   }
 });
@@ -155,16 +151,19 @@ app.get('/logout', (req, res) => {
   // Redirect to IdP end session endpoint
   try {
     const endSessionUrl = client.endSessionUrl({
-      post_logout_redirect_uri: 'https://localhost:5001/'
+      post_logout_redirect_uri: 'http://localhost:5001/'
     });
     res.redirect(endSessionUrl);
   } catch (err) {
-    console.error('[Portal-A/ELMS] Failed to generate endSessionUrl:', err);
+    console.error('[ELMS] Failed to generate endSessionUrl:', err);
     res.redirect('/');
   }
 });
 
 // API Routes
+app.get('/api/session', (req, res) => {
+  res.json({ authenticated: false });
+});
 app.use('/api/auth', authRoutes);
 app.use('/api/leaves', leaveRoutes);
 app.use('/api/employees', employeeRoutes);
@@ -180,7 +179,7 @@ app.get('*', (req, res) => {
 const certPath = join(__dirname, '../../certs/localhost.crt');
 const keyPath = join(__dirname, '../../certs/localhost.key');
 if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
-  console.error('[Portal-A/ELMS] SSL certificates not found at ' + certPath);
+  console.error('[ELMS] SSL certificates not found at ' + certPath);
   process.exit(1);
 }
 

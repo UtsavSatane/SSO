@@ -135,8 +135,8 @@ app.get('/logout', (req, res) => {
       post_logout_redirect_uri: POST_LOGOUT_REDIRECT_URI
     });
     
-    // Redirect to Portal-A's logout first, which will then redirect to the IdP's endSessionUrl
-    const chainUrl = `https://localhost:5001/logout?redirect=${encodeURIComponent(endSessionUrl)}`;
+    // Redirect to ELMS's logout first, which will then redirect to the IdP's endSessionUrl
+    const chainUrl = `https://localhost:6030/logout?redirect=${encodeURIComponent(endSessionUrl)}`;
     console.log('[Portal-B] Initiating logout chain. Redirecting to:', chainUrl);
     res.redirect(chainUrl);
   } catch (err) {

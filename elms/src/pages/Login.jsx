@@ -80,7 +80,7 @@ export default function Login({ onSwitch }) {
                 <button
                     id="sso-login-btn"
                     type="button"
-                    onClick={() => window.location.href = 'https://localhost:5001/login'}
+                    onClick={() => window.location.href = 'https://localhost:6030/login'}
                     className="btn btn-primary btn-full"
                     style={{
                         background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)',

@@ -40,13 +40,13 @@ async function verify() {
     success = false;
   }
 
-  console.log('\nChecking Portal-A session API...');
+  console.log('\nChecking ELMS session API...');
   try {
-    const session = await fetchJson('https://localhost:5001/api/session');
-    console.log('✅ Portal-A is ONLINE');
+    const session = await fetchJson('https://localhost:6030/api/session');
+    console.log('✅ ELMS is ONLINE');
     console.log(` - Authenticated: ${session.authenticated}`);
   } catch (err) {
-    console.error('❌ Portal-A is OFFLINE or returning errors:', err.message);
+    console.error('❌ ELMS is OFFLINE or returning errors:', err.message);
     success = false;
   }
 

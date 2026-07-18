@@ -8,7 +8,17 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem('elms_token');
+        const params = new URLSearchParams(window.location.search);
+        const urlToken = params.get('token');
+        let token = localStorage.getItem('elms_token');
+
+        if (urlToken) {
+            localStorage.setItem('elms_token', urlToken);
+            token = urlToken;
+            // Clean up the URL query parameters without reloading
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
         if (token) {
             getMe()
                 .then((userData) => setUser(userData))

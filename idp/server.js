@@ -29,11 +29,11 @@ async function startServer() {
     adapter: RedisAdapter,
     clients: [
       {
-        client_id: 'portal-a',
-        client_secret: 'portal-a-secret-999',
+        client_id: 'elms',
+        client_secret: 'elms-secret-999',
         grant_types: ['authorization_code'],
-        redirect_uris: ['https://localhost:5001/callback'],
-        post_logout_redirect_uris: ['https://localhost:5001/'],
+        redirect_uris: ['https://localhost:6030/callback'],
+        post_logout_redirect_uris: ['http://localhost:5001/'],
         scope: 'openid email profile'
       },
       {
