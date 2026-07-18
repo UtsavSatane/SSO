@@ -1,0 +1,221 @@
+@import url('https://fonts.googleapis.com/css2?family=Anonymous+Pro:ital,wght@0,400;0,700;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Fira+Code:wght@300;400;500;600;700&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inconsolata:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Lexend+Deca:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Red+Hat+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Share+Tech+Mono&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Source+Code+Pro:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme Variables */
+:root {
+  /* Default Carbon Theme */
+  --bg-color: #323437;
+  --main-color: #e2b714;
+  --sub-color: #646669;
+  --sub-alt-color: #2c2e31;
+  --text-color: #d1d0c5;
+  --error-color: #ca4754;
+  --error-extra-color: #7e2a33;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Outfit', sans-serif;
+}
+
+body.theme-carbon {
+  --bg-color: #323437;
+  --main-color: #e2b714;
+  --sub-color: #646669;
+  --sub-alt-color: #2c2e31;
+  --text-color: #d1d0c5;
+  --error-color: #ca4754;
+  --error-extra-color: #7e2a33;
+}
+
+body.theme-dracula {
+  --bg-color: #282a36;
+  --main-color: #bd93f9;
+  --sub-color: #6272a4;
+  --sub-alt-color: #1d1f27;
+  --text-color: #f8f8f2;
+  --error-color: #ff5555;
+  --error-extra-color: #8b2635;
+}
+
+body.theme-cyberpunk {
+  --bg-color: #14171c;
+  --main-color: #00e5ff;
+  --sub-color: #5c6370;
+  --sub-alt-color: #21262d;
+  --text-color: #ff007f;
+  --error-color: #e06c75;
+  --error-extra-color: #5c2020;
+}
+
+body.theme-sakura {
+  --bg-color: #f0e4e4;
+  --main-color: #e05a47;
+  --sub-color: #a39393;
+  --sub-alt-color: #e8dada;
+  --text-color: #564a4a;
+  --error-color: #c44141;
+  --error-extra-color: #782525;
+}
+
+body.theme-nord {
+  --bg-color: #2e3440;
+  --main-color: #88c0d0;
+  --sub-color: #4c566a;
+  --sub-alt-color: #3b4252;
+  --text-color: #d8dee9;
+  --error-color: #bf616a;
+  --error-extra-color: #8b4a50;
+}
+
+body.theme-matrix {
+  --bg-color: #000000;
+  --main-color: #15ff00;
+  --sub-color: #003b00;
+  --sub-alt-color: #001100;
+  --text-color: #00ff00;
+  --error-color: #ff0000;
+  --error-extra-color: #8b0000;
+}
+
+body.theme-mocha {
+  --bg-color: #1e1e2e;
+  --main-color: #cba6f7;
+  --sub-color: #585b70;
+  --sub-alt-color: #181825;
+  --text-color: #cdd6f4;
+  --error-color: #f38ba8;
+  --error-extra-color: #a63e5e;
+}
+
+body.theme-ocean {
+  --bg-color: #0b0f19;
+  --main-color: #00d2ff;
+  --sub-color: #4a5568;
+  --sub-alt-color: #121824;
+  --text-color: #e2e8f0;
+  --error-color: #ff5c5c;
+  --error-extra-color: #9c2c2c;
+}
+
+body.theme-botanical {
+  --bg-color: #1e2322;
+  --main-color: #7b9c91;
+  --sub-color: #5a6a63;
+  --sub-alt-color: #141716;
+  --text-color: #eceff1;
+  --error-color: #e05a47;
+  --error-extra-color: #782525;
+}
+
+body.theme-sepia {
+  --bg-color: #fbf8f3;
+  --main-color: #8c6239;
+  --sub-color: #a69a8f;
+  --sub-alt-color: #f0ebdf;
+  --text-color: #4a3e3d;
+  --error-color: #b83a3a;
+  --error-extra-color: #6e2020;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  overflow-x: hidden;
+}
+
+.mono-font {
+  font-family: var(--font-mono);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--sub-alt-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sub-color);
+}
+
+/* Caret Blinking Animation */
+@keyframes caret-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.animate-blink {
+  animation: caret-blink 1s steps(2, start) infinite;
+}
+
+/* Custom Selection */
+::selection {
+  background-color: var(--main-color);
+  color: var(--bg-color);
+}
+
+/* Font Family Overrides */
+body.font-family-jetbrains-mono {
+  --font-mono: 'JetBrains Mono', monospace;
+}
+body.font-family-fira-code {
+  --font-mono: 'Fira Code', monospace;
+}
+body.font-family-source-code-pro {
+  --font-mono: 'Source Code Pro', monospace;
+}
+body.font-family-roboto-mono {
+  --font-mono: 'Roboto Mono', monospace;
+}
+body.font-family-inconsolata {
+  --font-mono: 'Inconsolata', monospace;
+}
+body.font-family-ibm-plex-mono {
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+body.font-family-share-tech-mono {
+  --font-mono: 'Share Tech Mono', monospace;
+}
+body.font-family-anonymous-pro {
+  --font-mono: 'Anonymous Pro', monospace;
+}
+body.font-family-courier-prime {
+  --font-mono: 'Courier Prime', monospace;
+}
+body.font-family-space-mono {
+  --font-mono: 'Space Mono', monospace;
+}
+body.font-family-red-hat-mono {
+  --font-mono: 'Red Hat Mono', monospace;
+}
+body.font-family-outfit {
+  --font-mono: 'Outfit', sans-serif;
+}
+body.font-family-inter {
+  --font-mono: 'Inter', sans-serif;
+}
+body.font-family-lexend-deca {
+  --font-mono: 'Lexend Deca', sans-serif;
+}
+body.font-family-playfair-display {
+  --font-mono: 'Playfair Display', serif;
+}

@@ -22,7 +22,7 @@ app.use(session({
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'dist')));
 
 let client;
 
