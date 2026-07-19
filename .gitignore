@@ -1,7 +1,7 @@
 # Dependencies
 node_modules/
 elms/node_modules/
-portal-b/node_modules/
+typesprint/node_modules/
 idp/node_modules/
 
 # Local databases and locks
@@ -19,5 +19,5 @@ certs/
 # Environment configs
 .env
 elms/.env
-portal-b/.env
+typesprint/.env
 idp/.env

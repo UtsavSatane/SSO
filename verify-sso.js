@@ -50,13 +50,13 @@ async function verify() {
     success = false;
   }
 
-  console.log('\nChecking Portal-B session API...');
+  console.log('\nChecking TypeSprint session API...');
   try {
     const session = await fetchJson('https://localhost:5002/api/session');
-    console.log('✅ Portal-B is ONLINE');
+    console.log('✅ TypeSprint is ONLINE');
     console.log(` - Authenticated: ${session.authenticated}`);
   } catch (err) {
-    console.error('❌ Portal-B is OFFLINE or returning errors:', err.message);
+    console.error('❌ TypeSprint is OFFLINE or returning errors:', err.message);
     success = false;
   }
 

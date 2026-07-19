@@ -17,8 +17,8 @@ const POST_LOGOUT_REDIRECT_URI = `https://localhost:${PORT}/`;
 const app = express();
 
 app.use(session({
-  name: 'session_portal_b',
-  keys: ['portal-b-cookie-secret-key-999'],
+  name: 'session_typesprint',
+  keys: ['typesprint-cookie-secret-key-999'],
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
 
@@ -29,17 +29,17 @@ let client;
 async function initOIDC() {
   try {
     const idpIssuer = await Issuer.discover(IDP_URL);
-    console.log(`[Portal-B] Discovered IdP at ${IDP_URL}`);
+    console.log(`[TypeSprint] Discovered IdP at ${IDP_URL}`);
     
     client = new idpIssuer.Client({
-      client_id: 'portal-b',
-      client_secret: 'portal-b-secret-999',
+      client_id: 'typesprint',
+      client_secret: 'typesprint-secret-999',
       redirect_uris: [REDIRECT_URI],
       post_logout_redirect_uris: [POST_LOGOUT_REDIRECT_URI],
       response_types: ['code']
     });
   } catch (err) {
-    console.error('[Portal-B] Failed to discover OpenID Connect Identity Provider. Retrying in 5 seconds...', err.message);
+    console.error('[TypeSprint] Failed to discover OpenID Connect Identity Provider. Retrying in 5 seconds...', err.message);
     setTimeout(initOIDC, 5000);
   }
 }
@@ -102,7 +102,7 @@ app.get('/callback', async (req, res) => {
     req.session.oidc = null;
     res.redirect('/');
   } catch (err) {
-    console.error('[Portal-B] Callback validation failed:', err);
+    console.error('[TypeSprint] Callback validation failed:', err);
     res.status(500).send(`Authentication failed: ${err.message}`);
   }
 });
@@ -121,7 +121,7 @@ app.get('/logout', (req, res) => {
 
   const targetRedirect = req.query.redirect;
   if (targetRedirect) {
-    console.log('[Portal-B] Chained logout request received, redirecting to next page:', targetRedirect);
+    console.log('[TypeSprint] Chained logout request received, redirecting to next page:', targetRedirect);
     return res.redirect(targetRedirect);
   }
 
@@ -137,10 +137,10 @@ app.get('/logout', (req, res) => {
     
     // Redirect to ELMS's logout first, which will then redirect to the IdP's endSessionUrl
     const chainUrl = `https://localhost:6030/logout?redirect=${encodeURIComponent(endSessionUrl)}`;
-    console.log('[Portal-B] Initiating logout chain. Redirecting to:', chainUrl);
+    console.log('[TypeSprint] Initiating logout chain. Redirecting to:', chainUrl);
     res.redirect(chainUrl);
   } catch (err) {
-    console.error('[Portal-B] Failed to generate endSessionUrl:', err);
+    console.error('[TypeSprint] Failed to generate endSessionUrl:', err);
     res.redirect('/');
   }
 });
@@ -149,7 +149,7 @@ app.get('/logout', (req, res) => {
 const certPath = path.join(__dirname, '../certs/localhost.crt');
 const keyPath = path.join(__dirname, '../certs/localhost.key');
 if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
-  console.error('[Portal-B] SSL certificates not found. Please run "npm run certs" first.');
+  console.error('[TypeSprint] SSL certificates not found. Please run "npm run certs" first.');
   process.exit(1);
 }
 
@@ -159,6 +159,6 @@ const httpsOptions = {
 };
 
 https.createServer(httpsOptions, app).listen(PORT, () => {
-  console.log(`Portal B running at HTTPS: https://localhost:${PORT}`);
+  console.log(`TypeSprint running at HTTPS: https://localhost:${PORT}`);
   initOIDC();
 });

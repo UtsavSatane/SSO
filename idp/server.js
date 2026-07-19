@@ -14,6 +14,7 @@ const db = require('./db');
 const cache = require('./cache');
 const RedisAdapter = require('./oidc-adapter');
 const logger = require('./logger');
+const { getSecurityStats, getAuditLogs } = require('./logParser');
 
 // Disable self-signed SSL verification for development requests
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -37,8 +38,8 @@ async function startServer() {
         scope: 'openid email profile'
       },
       {
-        client_id: 'portal-b',
-        client_secret: 'portal-b-secret-999',
+        client_id: 'typesprint',
+        client_secret: 'typesprint-secret-999',
         grant_types: ['authorization_code'],
         redirect_uris: ['https://localhost:5002/callback'],
         post_logout_redirect_uris: ['https://localhost:5002/'],
@@ -107,6 +108,13 @@ async function startServer() {
       openid: ['sub'],
       email: ['email', 'email_verified'],
       profile: ['name']
+    },
+    ttl: {
+      AccessToken: 60 * 60,                // 1 hour
+      IdToken: 60 * 60,                    // 1 hour
+      AuthorizationCode: 60 * 10,          // 10 minutes
+      RefreshToken: 60 * 60 * 24 * 14, // 14 days
+      Session: 60 * 60 * 24 * 14       // 14 days
     }
   };
 
@@ -366,6 +374,17 @@ async function startServer() {
       await provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false });
     } catch (err) {
       next(err);
+    }
+  });
+
+  // Admin Security Dashboard Route
+  app.get('/admin/dashboard', (req, res) => {
+    try {
+      const stats = getSecurityStats();
+      const logs = getAuditLogs();
+      res.render('dashboard', { stats, logs });
+    } catch (err) {
+      res.status(500).send('Error loading dashboard: ' + err.message);
     }
   });
 
