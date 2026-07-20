@@ -6,6 +6,9 @@ export default function App() {
   const [quizzes, setQuizzes] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [activeQuiz, setActiveQuiz] = useState(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [isAnswered, setIsAnswered] = useState(false);
   const [answers, setAnswers] = useState({});
   const [quizResult, setQuizResult] = useState(null);
   const [activeTab, setActiveTab] = useState('quizzes'); // 'quizzes', 'leaderboard', 'history'
@@ -77,13 +80,33 @@ export default function App() {
       return;
     }
     setActiveQuiz(quiz);
+    setCurrentQuestionIndex(0);
+    setSelectedOption(null);
+    setIsAnswered(false);
     setAnswers({});
     setQuizResult(null);
     setTimeLeft(quiz.timeLimitSeconds || 180);
   };
 
-  const handleOptionSelect = (questionId, optionIndex) => {
-    setAnswers(prev => ({ ...prev, [questionId]: optionIndex }));
+  const handleOptionClick = (optIdx) => {
+    if (isAnswered || !activeQuiz) return;
+    setSelectedOption(optIdx);
+    setIsAnswered(true);
+
+    const currentQ = activeQuiz.questions[currentQuestionIndex];
+    setAnswers(prev => ({ ...prev, [currentQ.id]: optIdx }));
+  };
+
+  const handleNextQuestion = () => {
+    if (!activeQuiz) return;
+
+    if (currentQuestionIndex < activeQuiz.questions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+      setSelectedOption(null);
+      setIsAnswered(false);
+    } else {
+      handleQuizSubmit();
+    }
   };
 
   const handleQuizSubmit = async () => {
@@ -119,6 +142,13 @@ export default function App() {
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
+
+  const OPTION_BADGES = [
+    { label: 'A', bg: 'bg-rose-500/20 text-rose-300 border-rose-500/40', symbol: '▲' },
+    { label: 'B', bg: 'bg-blue-500/20 text-blue-300 border-blue-500/40', symbol: '◆' },
+    { label: 'C', bg: 'bg-amber-500/20 text-amber-300 border-amber-500/40', symbol: '●' },
+    { label: 'D', bg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', symbol: '■' }
+  ];
 
   if (loading) {
     return (
@@ -298,70 +328,146 @@ export default function App() {
           </div>
         )}
 
-        {/* Active Quiz Player Screen */}
+        {/* Enhanced Interactive Quiz Player Screen (Single Question per View + 4 Square Option Cards) */}
         {activeQuiz ? (
-          <div className="glass-card rounded-3xl p-8 border border-purple-500/30 relative">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-6 mb-6">
-              <div>
-                <span className="text-xs uppercase tracking-wider font-extrabold text-purple-400">{activeQuiz.category}</span>
-                <h2 className="text-2xl font-extrabold text-white mt-1">{activeQuiz.title}</h2>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="px-4 py-2 rounded-xl bg-purple-950/80 border border-purple-500/30 text-purple-300 font-mono font-bold text-lg">
-                  ⏱️ {formatTime(timeLeft)}
+          <div className="glass-card rounded-3xl p-8 border border-purple-500/30 relative flex flex-col justify-between min-h-[580px]">
+            {/* Top Bar: Progress & Time */}
+            <div>
+              <div className="flex items-center justify-between border-b border-slate-800 pb-6 mb-6">
+                <div>
+                  <span className="text-xs uppercase tracking-wider font-extrabold text-purple-400">{activeQuiz.category}</span>
+                  <h2 className="text-xl font-extrabold text-white mt-0.5">{activeQuiz.title}</h2>
                 </div>
-                <button
-                  onClick={() => setActiveQuiz(null)}
-                  className="text-slate-400 hover:text-slate-200 text-sm font-semibold px-3 py-1.5 rounded-lg border border-slate-800"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-
-            {/* Questions List */}
-            <div className="space-y-8">
-              {activeQuiz.questions.map((q, qIndex) => (
-                <div key={q.id} className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800/80">
-                  <h3 className="text-lg font-bold text-slate-100 mb-4 flex items-start gap-3">
-                    <span className="w-7 h-7 rounded-lg bg-purple-600/30 border border-purple-500/40 text-purple-300 font-bold text-sm flex items-center justify-center shrink-0">
-                      {qIndex + 1}
-                    </span>
-                    <span>{q.question}</span>
-                  </h3>
-                  <div className="space-y-3">
-                    {q.options.map((option, optIdx) => (
-                      <label
-                        key={optIdx}
-                        onClick={() => handleOptionSelect(q.id, optIdx)}
-                        className={`flex items-center gap-3 p-4 rounded-xl cursor-pointer border transition-all ${
-                          answers[q.id] === optIdx
-                            ? 'bg-purple-900/40 border-purple-500 text-white shadow-md'
-                            : 'bg-slate-950/50 border-slate-800 text-slate-300 hover:border-slate-700'
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name={`q-${q.id}`}
-                          checked={answers[q.id] === optIdx}
-                          onChange={() => {}}
-                          className="accent-purple-500 w-4 h-4"
-                        />
-                        <span className="text-sm font-medium">{option}</span>
-                      </label>
-                    ))}
+                <div className="flex items-center gap-4">
+                  <div className="px-4 py-2 rounded-xl bg-purple-950/80 border border-purple-500/30 text-purple-300 font-mono font-bold text-lg">
+                    ⏱️ {formatTime(timeLeft)}
                   </div>
+                  <button
+                    onClick={() => setActiveQuiz(null)}
+                    className="text-slate-400 hover:text-slate-200 text-sm font-semibold px-3 py-1.5 rounded-lg border border-slate-800 transition-colors"
+                  >
+                    Cancel
+                  </button>
                 </div>
-              ))}
+              </div>
+
+              {/* Progress Indicator */}
+              <div className="flex items-center justify-between text-xs font-semibold text-slate-400 mb-2">
+                <span>Question {currentQuestionIndex + 1} of {activeQuiz.questions.length}</span>
+                <span className="text-purple-400 font-bold">
+                  {Math.round(((currentQuestionIndex + 1) / activeQuiz.questions.length) * 100)}% Completed
+                </span>
+              </div>
+              <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800 mb-8">
+                <div
+                  className="h-full bg-gradient-to-r from-purple-600 via-indigo-500 to-cyan-400 transition-all duration-500 ease-out"
+                  style={{ width: `${((currentQuestionIndex + 1) / activeQuiz.questions.length) * 100}%` }}
+                ></div>
+              </div>
+
+              {/* Question Text */}
+              {(() => {
+                const currentQ = activeQuiz.questions[currentQuestionIndex];
+                return (
+                  <div>
+                    <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800/80 text-center mb-8 shadow-inner">
+                      <h3 className="text-2xl md:text-3xl font-extrabold text-white leading-relaxed">
+                        {currentQ.question}
+                      </h3>
+                    </div>
+
+                    {/* 4 Square Cards Layout for Options (2x2 Grid) */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+                      {currentQ.options.map((optionText, optIdx) => {
+                        const badgeInfo = OPTION_BADGES[optIdx % 4];
+                        const isCorrect = optIdx === currentQ.correctAnswer;
+                        const isSelected = selectedOption === optIdx;
+
+                        let cardStyle = 'bg-slate-900/90 border-slate-800/90 text-slate-200 hover:border-purple-500/60 hover:bg-slate-800/90 cursor-pointer hover:-translate-y-1';
+                        let badgeContent = <span className="font-bold">{badgeInfo.symbol} {badgeInfo.label}</span>;
+                        let badgeStyle = badgeInfo.bg;
+
+                        if (isAnswered) {
+                          if (isCorrect) {
+                            // Turn GREEN if correct
+                            cardStyle = 'bg-emerald-950/90 border-2 border-emerald-400 text-emerald-100 shadow-2xl shadow-emerald-500/30 scale-[1.02]';
+                            badgeContent = <span>✓ CORRECT</span>;
+                            badgeStyle = 'bg-emerald-500 text-slate-950 border-emerald-400 font-extrabold';
+                          } else if (isSelected) {
+                            // Turn RED if selected incorrectly
+                            cardStyle = 'bg-red-950/90 border-2 border-red-500 text-red-100 shadow-2xl shadow-red-500/30';
+                            badgeContent = <span>✗ INCORRECT</span>;
+                            badgeStyle = 'bg-red-500 text-white border-red-400 font-extrabold';
+                          } else {
+                            // Dim unselected options
+                            cardStyle = 'opacity-35 bg-slate-950 border-slate-900 text-slate-500 cursor-not-allowed';
+                          }
+                        }
+
+                        return (
+                          <div
+                            key={optIdx}
+                            onClick={() => handleOptionClick(optIdx)}
+                            className={`p-6 rounded-2xl border flex flex-col justify-between min-h-[140px] transition-all duration-300 relative group ${cardStyle}`}
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <span className={`px-3 py-1 rounded-xl text-xs border font-mono tracking-wider transition-all ${badgeStyle}`}>
+                                {badgeContent}
+                              </span>
+                              {isAnswered && isCorrect && (
+                                <span className="text-emerald-400 text-xl font-bold animate-bounce">✓</span>
+                              )}
+                              {isAnswered && isSelected && !isCorrect && (
+                                <span className="text-red-400 text-xl font-bold animate-pulse">✗</span>
+                              )}
+                            </div>
+                            <div className="text-lg font-bold leading-snug">
+                              {optionText}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Instant Feedback & Explanation Banner */}
+                    {isAnswered && (
+                      <div className={`p-5 rounded-2xl border mb-6 animate-fade-in transition-all ${
+                        selectedOption === currentQ.correctAnswer
+                          ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-200'
+                          : 'bg-red-950/60 border-red-500/40 text-red-200'
+                      }`}>
+                        <div className="font-extrabold text-sm flex items-center gap-2 mb-1">
+                          {selectedOption === currentQ.correctAnswer ? (
+                            <span className="text-emerald-400">🎉 Correct Answer!</span>
+                          ) : (
+                            <span className="text-red-400">❌ Incorrect Choice</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-300 leading-relaxed">
+                          💡 <span className="font-semibold text-white">Explanation:</span> {currentQ.explanation}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
-            <div className="mt-8 flex justify-end">
-              <button
-                onClick={handleQuizSubmit}
-                className="px-8 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-base shadow-xl shadow-purple-600/30 transition-all"
-              >
-                Submit Assessment
-              </button>
+            {/* Next / Submit Navigation Button */}
+            <div className="mt-6 border-t border-slate-800 pt-6 flex items-center justify-between">
+              <div className="text-xs text-slate-400">
+                {isAnswered ? 'Select Next Question to continue.' : 'Click one of the 4 option cards above to submit your answer.'}
+              </div>
+
+              {isAnswered && (
+                <button
+                  onClick={handleNextQuestion}
+                  className="px-8 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-base shadow-xl shadow-purple-600/30 transition-all flex items-center gap-2 animate-bounce"
+                >
+                  <span>{currentQuestionIndex < activeQuiz.questions.length - 1 ? 'Next Question' : 'Finish Assessment'}</span>
+                  <span>➔</span>
+                </button>
+              )}
             </div>
           </div>
         ) : quizResult ? (

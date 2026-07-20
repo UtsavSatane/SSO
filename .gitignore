@@ -8,6 +8,7 @@ idp/node_modules/
 elms/server/elms.db
 elms/server/elms.db-journal
 idp/jwks.json
+idp/dev-users.json
 
 # Logs
 idp/logs/
