@@ -87,7 +87,7 @@ async function initializeOidcClient() {
 
 initializeOidcClient();
 
-// Expanded Question Pools Database (10 Questions Per Topic)
+// Expanded Question Pools Database (10 Unique Questions Per Topic with String IDs)
 const QUIZ_DATABASE = [
   {
     id: 'python-mastery',
@@ -99,70 +99,70 @@ const QUIZ_DATABASE = [
     timeLimitSeconds: 240,
     questionsPool: [
       {
-        id: 1,
+        id: 'py-1',
         question: 'What is the output of type([]) in Python?',
         options: ['<class "list">', '<class "array">', '<class "tuple">', '<class "object">'],
         correctAnswer: 0,
         explanation: '[] denotes a list in Python, so its type is <class "list">.'
       },
       {
-        id: 2,
+        id: 'py-2',
         question: 'Which keyword is used to declare a function in Python?',
         options: ['function', 'def', 'func', 'define'],
         correctAnswer: 1,
         explanation: 'The "def" keyword is used to define a function in Python.'
       },
       {
-        id: 3,
+        id: 'py-3',
         question: 'What is the value of 2 ** 3 in Python?',
         options: ['6', '8', '9', '5'],
         correctAnswer: 1,
         explanation: '** is the exponentiation operator in Python. 2 ** 3 equals 8.'
       },
       {
-        id: 4,
+        id: 'py-4',
         question: 'Which of the following data structures is immutable in Python?',
         options: ['List', 'Dictionary', 'Set', 'Tuple'],
         correctAnswer: 3,
         explanation: 'Tuples are immutable sequence types whose elements cannot be modified after creation.'
       },
       {
-        id: 5,
+        id: 'py-5',
         question: 'What does len({"a": 1, "b": 2}) return in Python?',
         options: ['1', '2', '4', '0'],
         correctAnswer: 1,
         explanation: 'len() returns the number of key-value pairs in a dictionary, which is 2.'
       },
       {
-        id: 6,
+        id: 'py-6',
         question: 'Which method adds a single item to the end of a Python list?',
         options: ['append()', 'add()', 'push()', 'insert()'],
         correctAnswer: 0,
         explanation: 'The append() method adds an element to the end of a list.'
       },
       {
-        id: 7,
+        id: 'py-7',
         question: 'What is the character at index 1 of string "Hello"?',
         options: ['H', 'e', 'l', 'o'],
         correctAnswer: 1,
         explanation: 'Python uses 0-based indexing. Index 0 is "H", index 1 is "e".'
       },
       {
-        id: 8,
+        id: 'py-8',
         question: 'Which block catches exceptions in Python try statements?',
         options: ['catch', 'except', 'error', 'handle'],
         correctAnswer: 1,
         explanation: 'The "except" block handles exceptions in Python.'
       },
       {
-        id: 9,
+        id: 'py-9',
         question: 'What is the boolean evaluation of bool(0) in Python?',
         options: ['True', 'False', 'None', 'Error'],
         correctAnswer: 1,
         explanation: 'Numeric zero evaluates to False in Python.'
       },
       {
-        id: 10,
+        id: 'py-10',
         question: 'Which standard library module generates pseudo-random numbers?',
         options: ['math', 'random', 'sys', 'os'],
         correctAnswer: 1,
@@ -180,70 +180,70 @@ const QUIZ_DATABASE = [
     timeLimitSeconds: 240,
     questionsPool: [
       {
-        id: 1,
+        id: 'java-1',
         question: 'Which of the following is NOT a primitive data type in Java?',
         options: ['int', 'boolean', 'String', 'double'],
         correctAnswer: 2,
         explanation: 'String is a reference object class in Java, whereas int, boolean, and double are primitive types.'
       },
       {
-        id: 2,
+        id: 'java-2',
         question: 'Which keyword is used by a Java class to inherit an interface?',
         options: ['extends', 'implements', 'inherits', 'imports'],
         correctAnswer: 1,
         explanation: 'Classes use the "implements" keyword to declare and implement interfaces in Java.'
       },
       {
-        id: 3,
+        id: 'java-3',
         question: 'What is the default value of an uninitialized boolean field in a Java class?',
         options: ['true', 'false', 'null', '0'],
         correctAnswer: 1,
         explanation: 'Uninitialized class instance variables of primitive boolean type default to false.'
       },
       {
-        id: 4,
+        id: 'java-4',
         question: 'Which component enables Java "Write Once, Run Anywhere" capability?',
         options: ['Java Virtual Machine (JVM)', 'Garbage Collector', 'Java Compiler (javac)', 'Java SDK'],
         correctAnswer: 0,
         explanation: 'The JVM executes compiled bytecode (.class files) across any underlying operating system.'
       },
       {
-        id: 5,
+        id: 'java-5',
         question: 'What is the superclass of all classes in Java?',
         options: ['java.lang.System', 'java.lang.Object', 'java.lang.Class', 'java.lang.Main'],
         correctAnswer: 1,
         explanation: 'java.lang.Object is the root class of the Java class hierarchy.'
       },
       {
-        id: 6,
+        id: 'java-6',
         question: 'Which modifier prevents a class from being subclassed in Java?',
         options: ['static', 'final', 'abstract', 'private'],
         correctAnswer: 1,
         explanation: 'A final class cannot be extended by any other class.'
       },
       {
-        id: 7,
+        id: 'java-7',
         question: 'How do you declare an array of 5 integers in Java?',
         options: ['int[] arr = new int[5];', 'int arr[5];', 'array<int> arr = 5;', 'int arr = new array(5);'],
         correctAnswer: 0,
         explanation: 'int[] arr = new int[5]; allocates memory for 5 integer elements.'
       },
       {
-        id: 8,
+        id: 'java-8',
         question: 'Which access modifier grants visibility only to package members and subclasses?',
         options: ['public', 'private', 'protected', 'package-private'],
         correctAnswer: 2,
         explanation: 'protected members are accessible within the package and by subclasses.'
       },
       {
-        id: 9,
+        id: 'java-9',
         question: 'Which Java collection interface does NOT allow duplicate elements?',
         options: ['List', 'Set', 'Queue', 'Collection'],
         correctAnswer: 1,
         explanation: 'A Set is a Collection that contains no duplicate elements.'
       },
       {
-        id: 10,
+        id: 'java-10',
         question: 'Which method starts execution of a Thread object in Java?',
         options: ['run()', 'start()', 'execute()', 'begin()'],
         correctAnswer: 1,
@@ -261,70 +261,70 @@ const QUIZ_DATABASE = [
     timeLimitSeconds: 240,
     questionsPool: [
       {
-        id: 1,
+        id: 'gk-1',
         question: 'Which planet in our solar system is known as the "Red Planet"?',
         options: ['Venus', 'Mars', 'Jupiter', 'Saturn'],
         correctAnswer: 1,
         explanation: 'Mars gets its reddish appearance from iron oxide (rust) on its surface.'
       },
       {
-        id: 2,
+        id: 'gk-2',
         question: 'What is the chemical symbol for Gold?',
         options: ['Ag', 'Fe', 'Au', 'Gd'],
         correctAnswer: 2,
         explanation: 'The chemical symbol for Gold is Au, derived from the Latin word aurum.'
       },
       {
-        id: 3,
+        id: 'gk-3',
         question: 'What is the largest ocean on Earth?',
         options: ['Atlantic Ocean', 'Indian Ocean', 'Arctic Ocean', 'Pacific Ocean'],
         correctAnswer: 3,
         explanation: 'The Pacific Ocean is the largest and deepest ocean basin on Earth.'
       },
       {
-        id: 4,
+        id: 'gk-4',
         question: 'Who wrote the famous play "Romeo and Juliet"?',
         options: ['Charles Dickens', 'William Shakespeare', 'Mark Twain', 'Jane Austen'],
         correctAnswer: 1,
         explanation: '"Romeo and Juliet" is a famous tragedy written by William Shakespeare.'
       },
       {
-        id: 5,
+        id: 'gk-5',
         question: 'Which gas do plants absorb from the atmosphere during photosynthesis?',
         options: ['Oxygen', 'Carbon Dioxide', 'Nitrogen', 'Hydrogen'],
         correctAnswer: 1,
         explanation: 'Plants absorb Carbon Dioxide (CO2) and water to produce glucose and release Oxygen.'
       },
       {
-        id: 6,
+        id: 'gk-6',
         question: 'What is the capital city of Japan?',
         options: ['Kyoto', 'Osaka', 'Tokyo', 'Hiroshima'],
         correctAnswer: 2,
         explanation: 'Tokyo is the capital and largest metropolis of Japan.'
       },
       {
-        id: 7,
+        id: 'gk-7',
         question: 'Which element is most abundant in Earth\'s atmosphere?',
         options: ['Oxygen', 'Nitrogen', 'Carbon', 'Argon'],
         correctAnswer: 1,
         explanation: 'Nitrogen makes up approximately 78% of Earth\'s atmosphere.'
       },
       {
-        id: 8,
+        id: 'gk-8',
         question: 'What is the hardest naturally occurring substance on Earth?',
         options: ['Quartz', 'Titanium', 'Diamond', 'Granite'],
         correctAnswer: 2,
         explanation: 'Diamond is the hardest known natural material on Mohs hardness scale.'
       },
       {
-        id: 9,
+        id: 'gk-9',
         question: 'Which organ pumps blood throughout the human body?',
         options: ['Lungs', 'Liver', 'Heart', 'Kidneys'],
         correctAnswer: 2,
         explanation: 'The Heart is the muscular organ that pumps blood through the circulatory system.'
       },
       {
-        id: 10,
+        id: 'gk-10',
         question: 'What is the official currency of the United Kingdom?',
         options: ['Euro', 'Pound Sterling (£)', 'Dollar', 'Franc'],
         correctAnswer: 1,
@@ -342,70 +342,70 @@ const QUIZ_DATABASE = [
     timeLimitSeconds: 240,
     questionsPool: [
       {
-        id: 1,
+        id: 'math-1',
         question: 'What is the value of (15 × 4) - 20?',
         options: ['40', '50', '60', '30'],
         correctAnswer: 0,
         explanation: '15 × 4 = 60, then 60 - 20 = 40.'
       },
       {
-        id: 2,
+        id: 'math-2',
         question: 'What is 25% of 200?',
         options: ['25', '50', '75', '100'],
         correctAnswer: 1,
         explanation: '25% = 0.25. 0.25 × 200 = 50.'
       },
       {
-        id: 3,
+        id: 'math-3',
         question: 'What is the square root of 144?',
         options: ['10', '11', '12', '14'],
         correctAnswer: 2,
         explanation: '12 × 12 = 144, so the square root is 12.'
       },
       {
-        id: 4,
+        id: 'math-4',
         question: 'If a triangle has angles measuring 60° and 70°, what is the measure of the third angle?',
         options: ['50°', '60°', '70°', '90°'],
         correctAnswer: 0,
         explanation: 'The sum of angles in a triangle is 180°. 180° - (60° + 70°) = 50°.'
       },
       {
-        id: 5,
+        id: 'math-5',
         question: 'What is the next number in the sequence: 2, 4, 8, 16, ___?',
         options: ['24', '30', '32', '64'],
         correctAnswer: 2,
         explanation: 'Each number doubles the previous number (16 × 2 = 32).'
       },
       {
-        id: 6,
+        id: 'math-6',
         question: 'If a vehicle travels 120 km in 2 hours, what is its average speed?',
         options: ['50 km/h', '60 km/h', '70 km/h', '80 km/h'],
         correctAnswer: 1,
         explanation: 'Speed = Distance / Time = 120 / 2 = 60 km/h.'
       },
       {
-        id: 7,
+        id: 'math-7',
         question: 'What is the square of 15 (15²)?',
         options: ['200', '215', '225', '250'],
         correctAnswer: 2,
         explanation: '15 × 15 = 225.'
       },
       {
-        id: 8,
+        id: 'math-8',
         question: 'What is the smallest prime number?',
         options: ['0', '1', '2', '3'],
         correctAnswer: 2,
         explanation: '2 is the smallest and only even prime number.'
       },
       {
-        id: 9,
+        id: 'math-9',
         question: 'Convert the fraction 3/4 into a percentage.',
         options: ['60%', '70%', '75%', '80%'],
         correctAnswer: 2,
         explanation: '3 ÷ 4 = 0.75 = 75%.'
       },
       {
-        id: 10,
+        id: 'math-10',
         question: 'Solve for x: 3x + 9 = 24',
         options: ['3', '4', '5', '6'],
         correctAnswer: 2,
@@ -423,70 +423,70 @@ const QUIZ_DATABASE = [
     timeLimitSeconds: 240,
     questionsPool: [
       {
-        id: 1,
+        id: 'sports-1',
         question: 'Which country won the FIFA World Cup in 2022?',
         options: ['France', 'Brazil', 'Argentina', 'Croatia'],
         correctAnswer: 2,
         explanation: 'Argentina won the 2022 FIFA World Cup in Qatar after defeating France in a dramatic final.'
       },
       {
-        id: 2,
+        id: 'sports-2',
         question: 'How many players are on the field for one team in a standard Cricket match?',
         options: ['9', '10', '11', '12'],
         correctAnswer: 2,
         explanation: 'A standard cricket team consists of 11 active players on the field.'
       },
       {
-        id: 3,
+        id: 'sports-3',
         question: 'In Tennis, what term is used to describe a score of 40-40 in a game?',
         options: ['Love', 'Deuce', 'Advantage', 'Break'],
         correctAnswer: 1,
         explanation: 'A score of 40-40 in a game of tennis is called Deuce.'
       },
       {
-        id: 4,
+        id: 'sports-4',
         question: 'Who holds the 100m sprint world record time of 9.58 seconds?',
         options: ['Tyson Gay', 'Usain Bolt', 'Yohan Blake', 'Justin Gatlin'],
         correctAnswer: 1,
         explanation: 'Usain Bolt set the 100m world record of 9.58 seconds at the 2009 World Athletics Championships in Berlin.'
       },
       {
-        id: 5,
+        id: 'sports-5',
         question: 'Which sport uses terms like "Eagle", "Birdie", and "Bogey"?',
         options: ['Golf', 'Badminton', 'Baseball', 'Polo'],
         correctAnswer: 0,
         explanation: 'These terms represent scores relative to par on a hole in Golf.'
       },
       {
-        id: 6,
+        id: 'sports-6',
         question: 'Which city hosted the 2024 Summer Olympic Games?',
         options: ['Tokyo', 'London', 'Paris', 'Los Angeles'],
         correctAnswer: 2,
         explanation: 'Paris, France hosted the 2024 Summer Olympic Games.'
       },
       {
-        id: 7,
+        id: 'sports-7',
         question: 'In Basketball, how many points is a shot worth when taken from beyond the arc?',
         options: ['1 point', '2 points', '3 points', '4 points'],
         correctAnswer: 2,
         explanation: 'Field goals made from outside the three-point line are worth 3 points.'
       },
       {
-        id: 8,
+        id: 'sports-8',
         question: 'Which Grand Slam tennis tournament is famously played on grass courts?',
         options: ['Australian Open', 'French Open', 'Wimbledon', 'US Open'],
         correctAnswer: 2,
         explanation: 'Wimbledon is the world\'s oldest tennis tournament played on grass courts.'
       },
       {
-        id: 9,
+        id: 'sports-9',
         question: 'What is the standard duration of a professional Football (Soccer) match?',
         options: ['80 minutes', '90 minutes', '100 minutes', '120 minutes'],
         correctAnswer: 1,
         explanation: 'A standard soccer match consists of two 45-minute halves totaling 90 minutes.'
       },
       {
-        id: 10,
+        id: 'sports-10',
         question: 'In Boxing, what does the abbreviation "KO" stand for?',
         options: ['Knockout', 'Kick Out', 'Key Option', 'King Of Ring'],
         correctAnswer: 0,
@@ -555,7 +555,8 @@ app.post('/api/submit-quiz', (req, res) => {
 
   let correctCount = 0;
   questionList.forEach((q) => {
-    if (userAnswers[q.id] === q.correctAnswer) {
+    const userSelected = userAnswers ? (userAnswers[q.id] !== undefined ? userAnswers[q.id] : userAnswers[q.id.toString()]) : undefined;
+    if (userSelected === q.correctAnswer) {
       correctCount++;
     }
   });

@@ -15,6 +15,7 @@ export default function App() {
   const [appSwitcherOpen, setAppSwitcherOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const autoNextTimerRef = useRef(null);
+  const answersRef = useRef({});
 
   // Theme State (Dark / Light)
   const [theme, setTheme] = useState(() => localStorage.getItem('evalhub-theme') || 'dark');
@@ -133,6 +134,7 @@ export default function App() {
       return;
     }
     if (autoNextTimerRef.current) clearTimeout(autoNextTimerRef.current);
+    answersRef.current = {};
 
     try {
       const res = await fetch(`/api/quiz/${quiz.id}/questions`);
@@ -174,7 +176,8 @@ export default function App() {
     setIsAnswered(true);
 
     const currentQ = activeQuiz.questions[currentQuestionIndex];
-    setAnswers(prev => ({ ...prev, [currentQ.id]: optIdx }));
+    answersRef.current[currentQ.id] = optIdx;
+    setAnswers({ ...answersRef.current });
 
     // Clear existing timer if any
     if (autoNextTimerRef.current) {
@@ -209,13 +212,15 @@ export default function App() {
     if (autoNextTimerRef.current) clearTimeout(autoNextTimerRef.current);
     exitFullscreenMode();
 
+    const submittedAnswers = { ...answersRef.current };
+
     try {
       const res = await fetch('/api/submit-quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           quizId: activeQuiz.id,
-          userAnswers: answers,
+          userAnswers: submittedAnswers,
           submittedQuestions: activeQuiz.questions,
           timeSpent: (activeQuiz.timeLimitSeconds || 240) - timeLeft
         })
