@@ -23,16 +23,12 @@ function TypingBox({
   const [ghostCaretPos, setGhostCaretPos] = useState(null)
   const { playClick } = useAudioSynth()
 
-  // Focus the input on mount or container click
+  // Focus the input when user clicks Start Typing or container
   const focusInput = () => {
     if (onFocusCheck && onFocusCheck()) return;
     inputRef.current?.focus()
     setIsFocused(true)
   }
-
-  useEffect(() => {
-    focusInput()
-  }, [])
 
   // Update caret position
   const updateCaretPosition = () => {
@@ -182,15 +178,27 @@ function TypingBox({
         cursor: "text"
       }}
     >
-      {/* Click to Focus Overlay */}
+      {/* Start Typing Button Overlay */}
       {!isFocused && (
         <div
-          className="absolute inset-0 flex items-center justify-center rounded-2xl z-20 backdrop-blur-[3px] transition-all duration-300"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.25)" }}
+          className="absolute inset-0 flex items-center justify-center rounded-2xl z-20 backdrop-blur-[4px] transition-all duration-300"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.35)" }}
         >
-          <div className="text-center font-medium select-none pointer-events-none" style={{ color: "var(--main-color)" }}>
-            <span className="animate-pulse">🖱️ Click here or press any key to focus</span>
-          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              focusInput();
+            }}
+            className="px-6 py-3 rounded-xl font-sans font-extrabold text-base tracking-wide shadow-xl transition-all transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2 border-0 outline-none"
+            style={{
+              backgroundColor: "var(--main-color)",
+              color: "var(--bg-color)",
+              boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.4)"
+            }}
+          >
+            <span>⌨️</span>
+            <span>Start Typing</span>
+          </button>
         </div>
       )}
 
