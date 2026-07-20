@@ -44,6 +44,14 @@ async function startServer() {
         redirect_uris: ['https://localhost:5002/callback'],
         post_logout_redirect_uris: ['https://localhost:5002/'],
         scope: 'openid email profile'
+      },
+      {
+        client_id: 'evalhub',
+        client_secret: 'evalhub-secret-999',
+        grant_types: ['authorization_code'],
+        redirect_uris: ['https://localhost:5003/callback'],
+        post_logout_redirect_uris: ['https://localhost:5003/'],
+        scope: 'openid email profile'
       }
     ],
     jwks: require('./jwks.json'),

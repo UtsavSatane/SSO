@@ -78,6 +78,9 @@ function RaceScreen({ theme, setTheme, font, setFont, soundEnabled, setSoundEnab
   const [finished, setFinished] = useState(false)
   const [secElapsed, setSecElapsed] = useState(0)
   
+  // Auth Check Modal State
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  
   // Theme and Font dropdown states and refs
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false)
   const [isFontMenuOpen, setIsFontMenuOpen] = useState(false)
@@ -343,6 +346,11 @@ function RaceScreen({ theme, setTheme, font, setFont, soundEnabled, setSoundEnab
   const handleChar = (value) => {
     if (finished) return
 
+    if (!currentUser) {
+      setShowAuthModal(true)
+      return
+    }
+
     // Start timer on first keypress
     if (!timerStartedRef.current) {
       timerStartedRef.current = true
@@ -372,6 +380,11 @@ function RaceScreen({ theme, setTheme, font, setFont, soundEnabled, setSoundEnab
   // Intercept Spacebar submissions
   const handleSpace = (wordText) => {
     if (finished) return
+
+    if (!currentUser) {
+      setShowAuthModal(true)
+      return
+    }
 
     // Increment keystroke (for spacebar)
     totalKeystrokes.current += 1
@@ -584,6 +597,13 @@ function RaceScreen({ theme, setTheme, font, setFont, soundEnabled, setSoundEnab
           onRestart={initializeTest}
           testActive={started && !finished}
           ghostPosition={ghostPosition}
+          onFocusCheck={() => {
+            if (!currentUser) {
+              setShowAuthModal(true)
+              return true
+            }
+            return false
+          }}
         />
 
         {/* Bottom Controls / Reset */}
@@ -743,6 +763,79 @@ function RaceScreen({ theme, setTheme, font, setFont, soundEnabled, setSoundEnab
           </div>
         </div>
       </footer>
+
+      {/* Authentication Required Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in font-sans">
+          <div 
+            className="w-full max-w-md rounded-2xl border p-8 shadow-2xl flex flex-col items-center text-center relative"
+            style={{
+              backgroundColor: "var(--bg-color)",
+              borderColor: "var(--sub-alt-color)",
+              color: "var(--text-color)"
+            }}
+          >
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="absolute top-4 right-4 text-xs font-mono font-bold hover:opacity-100 opacity-60 cursor-pointer"
+              style={{ color: "var(--sub-color)" }}
+            >
+              ✕
+            </button>
+
+            <div 
+              className="w-16 h-16 rounded-full flex items-center justify-center font-bold text-2xl mb-4"
+              style={{
+                backgroundColor: "var(--sub-alt-color)",
+                border: "2px solid var(--main-color)",
+                color: "var(--main-color)"
+              }}
+            >
+              🔒
+            </div>
+
+            <h3 className="text-2xl font-extrabold tracking-tight mb-2">
+              Authentication Required
+            </h3>
+            <p className="text-sm mb-6 max-w-sm" style={{ color: "var(--sub-color)" }}>
+              To start typing on TypeSprint and record your typing speed (WPM) stats, please sign in or register with your SSO account.
+            </p>
+
+            <div className="w-full space-y-3 font-sans">
+              <button
+                onClick={() => window.location.href = '/login'}
+                className="w-full py-3.5 rounded-xl font-bold transition-all cursor-pointer text-sm shadow-md"
+                style={{
+                  backgroundColor: "var(--main-color)",
+                  color: "var(--bg-color)"
+                }}
+              >
+                Sign In with SSO
+              </button>
+
+              <button
+                onClick={() => window.location.href = '/login'}
+                className="w-full py-3.5 rounded-xl font-semibold transition-all cursor-pointer text-sm border"
+                style={{
+                  backgroundColor: "var(--sub-alt-color)",
+                  color: "var(--text-color)",
+                  borderColor: "var(--sub-color)"
+                }}
+              >
+                Create New Account (Sign Up)
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="mt-5 text-xs font-mono opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
+              style={{ color: "var(--sub-color)" }}
+            >
+              cancel & return to preview
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

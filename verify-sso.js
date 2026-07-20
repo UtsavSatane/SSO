@@ -60,6 +60,16 @@ async function verify() {
     success = false;
   }
 
+  console.log('\nChecking EvalHub session API...');
+  try {
+    const session = await fetchJson('https://localhost:5003/api/session');
+    console.log('✅ EvalHub is ONLINE');
+    console.log(` - Authenticated: ${session.authenticated}`);
+  } catch (err) {
+    console.error('❌ EvalHub is OFFLINE or returning errors:', err.message);
+    success = false;
+  }
+
   if (success) {
     console.log('\n✅ All backend systems verified successfully!');
   } else {

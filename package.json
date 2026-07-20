@@ -5,8 +5,8 @@
   "main": "generate-certs.js",
   "scripts": {
     "certs": "node generate-certs.js",
-    "install-all": "npm install && npm install --prefix idp && npm install --prefix elms && npm install --prefix typesprint",
-    "dev": "concurrently \"npm run dev --prefix idp\" \"npm run dev --prefix elms\" \"npm run dev --prefix typesprint\"",
+    "install-all": "npm install && npm install --prefix idp && npm install --prefix elms && npm install --prefix typesprint && npm install --prefix evalhub",
+    "dev": "concurrently \"npm run dev --prefix idp\" \"npm run dev --prefix elms\" \"npm run dev --prefix typesprint\" \"npm run dev --prefix evalhub\"",
     "verify": "node verify-sso.js"
   },
   "devDependencies": {

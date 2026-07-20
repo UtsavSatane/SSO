@@ -12,7 +12,8 @@ function TypingBox({
   onBackspacePrevWord,
   onRestart,
   testActive,
-  ghostPosition
+  ghostPosition,
+  onFocusCheck
 }) {
   const containerRef = useRef(null)
   const inputRef = useRef(null)
@@ -24,6 +25,7 @@ function TypingBox({
 
   // Focus the input on mount or container click
   const focusInput = () => {
+    if (onFocusCheck && onFocusCheck()) return;
     inputRef.current?.focus()
     setIsFocused(true)
   }
