@@ -119,107 +119,286 @@ app.get('/api/session', (req, res) => {
 // Quiz Database & Assessment Logic
 const QUIZZES = [
   {
-    id: 'oidc-security',
-    title: 'OAuth 2.0 & OpenID Connect Security',
-    category: 'Security & Auth',
-    badge: 'OIDC Architect',
-    icon: 'ShieldCheck',
-    description: 'Test your understanding of ID Tokens, Access Tokens, PKCE, Grant Types, and SSO security best practices.',
-    timeLimitSeconds: 180,
+    id: 'python-mastery',
+    title: 'Python Fundamentals & Scripting',
+    category: 'Programming',
+    badge: 'Python Developer',
+    icon: 'Terminal',
+    description: 'Test your core knowledge of Python data structures, list comprehensions, built-ins, and syntax.',
+    timeLimitSeconds: 240,
     questions: [
       {
         id: 1,
-        question: 'What is the primary purpose of PKCE (Proof Key for Code Exchange) in OAuth 2.0 / OIDC?',
+        question: 'What is the output of type([]) in Python?',
         options: [
-          'To encrypt user passwords before sending them to the IDP',
-          'To prevent authorization code interception attacks on public or confidential clients',
-          'To compress the ID token payload size for mobile applications',
-          'To bypass user consent prompt during authentication'
+          '<class "list">',
+          '<class "array">',
+          '<class "tuple">',
+          '<class "object">'
         ],
-        correctAnswer: 1,
-        explanation: 'PKCE creates a dynamic code verifier and challenge to ensure that only the client who initiated the auth request can exchange the authorization code.'
+        correctAnswer: 0,
+        explanation: '[] denotes a list in Python, so its type is <class "list">.'
       },
       {
         id: 2,
-        question: 'Which token is specifically designed for authorization to access protected APIs?',
+        question: 'Which keyword is used to declare a function in Python?',
         options: [
-          'ID Token',
-          'Refresh Token',
-          'Access Token',
-          'Session Cookie'
+          'function',
+          'def',
+          'func',
+          'define'
         ],
-        correctAnswer: 2,
-        explanation: 'Access Tokens are used to authorize API requests, whereas ID Tokens carry identity claims about the authenticated user.'
+        correctAnswer: 1,
+        explanation: 'The "def" keyword is used to define a function in Python.'
       },
       {
         id: 3,
-        question: 'Which OIDC scope is mandatory to request an ID Token?',
+        question: 'What is the value of 2 ** 3 in Python?',
         options: [
-          'email',
-          'profile',
-          'openid',
-          'offline_access'
+          '6',
+          '8',
+          '9',
+          '5'
         ],
-        correctAnswer: 2,
-        explanation: 'The "openid" scope is mandatory in OpenID Connect to signal an authentication request and receive an ID Token.'
+        correctAnswer: 1,
+        explanation: '** is the exponentiation operator in Python. 2 ** 3 equals 8.'
+      },
+      {
+        id: 4,
+        question: 'Which of the following data structures is immutable in Python?',
+        options: [
+          'List',
+          'Dictionary',
+          'Set',
+          'Tuple'
+        ],
+        correctAnswer: 3,
+        explanation: 'Tuples are immutable sequence types whose elements cannot be modified after creation.'
+      },
+      {
+        id: 5,
+        question: 'What does len({"a": 1, "b": 2}) return in Python?',
+        options: [
+          '1',
+          '2',
+          '4',
+          '0'
+        ],
+        correctAnswer: 1,
+        explanation: 'len() returns the number of key-value pairs in a dictionary, which is 2.'
       }
     ]
   },
   {
-    id: 'javascript-mastery',
-    title: 'Modern JavaScript & Async Patterns',
-    category: 'Web Development',
-    badge: 'JS Specialist',
+    id: 'java-core',
+    title: 'Java Core & OOP Concepts',
+    category: 'Programming',
+    badge: 'Java Architect',
     icon: 'Code2',
-    description: 'Master Promises, async/await, Event Loop mechanics, closures, and ES Next features.',
-    timeLimitSeconds: 180,
+    description: 'Assess Object-Oriented Programming principles, JVM fundamentals, interfaces, and exception handling.',
+    timeLimitSeconds: 240,
     questions: [
       {
         id: 1,
-        question: 'What order will console.log output in: setTimeout(() => console.log("A"), 0); Promise.resolve().then(() => console.log("B"));',
+        question: 'Which of the following is NOT a primitive data type in Java?',
         options: [
-          'A then B',
-          'B then A',
-          'Random order depending on system CPU load',
-          'Both log simultaneously'
+          'int',
+          'boolean',
+          'String',
+          'double'
         ],
-        correctAnswer: 1,
-        explanation: 'Promise callbacks land in the Microtask Queue, which executes before the Macrotask Queue (setTimeout).'
+        correctAnswer: 2,
+        explanation: 'String is a reference object class in Java, whereas int, boolean, and double are primitive types.'
       },
       {
         id: 2,
-        question: 'Which operator is used for Nullish Coalescing in JS?',
+        question: 'Which keyword is used by a Java class to inherit an interface?',
         options: [
-          '||',
-          '&&',
-          '??',
-          '?!'
+          'extends',
+          'implements',
+          'inherits',
+          'imports'
         ],
-        correctAnswer: 2,
-        explanation: 'The nullish coalescing operator (??) returns its right-hand operand only when its left-hand operand is null or undefined.'
+        correctAnswer: 1,
+        explanation: 'Classes use the "implements" keyword to declare and implement interfaces in Java.'
+      },
+      {
+        id: 3,
+        question: 'What is the default value of an uninitialized boolean field in a Java class?',
+        options: [
+          'true',
+          'false',
+          'null',
+          '0'
+        ],
+        correctAnswer: 1,
+        explanation: 'Uninitialized class instance variables of primitive boolean type default to false.'
+      },
+      {
+        id: 4,
+        question: 'Which component enables Java "Write Once, Run Anywhere" capability?',
+        options: [
+          'Java Virtual Machine (JVM)',
+          'Garbage Collector',
+          'Java Compiler (javac)',
+          'Java SDK'
+        ],
+        correctAnswer: 0,
+        explanation: 'The JVM executes compiled bytecode (.class files) across any underlying operating system.'
+      },
+      {
+        id: 5,
+        question: 'What is the superclass of all classes in Java?',
+        options: [
+          'java.lang.System',
+          'java.lang.Object',
+          'java.lang.Class',
+          'java.lang.Main'
+        ],
+        correctAnswer: 1,
+        explanation: 'java.lang.Object is the root class of the Java class hierarchy.'
       }
     ]
   },
   {
-    id: 'system-architecture',
-    title: 'Distributed Systems & API Design',
-    category: 'Architecture',
-    badge: 'Systems Specialist',
-    icon: 'Network',
-    description: 'Evaluate microservices communication, rate limiting, token rotation, and system resilience.',
-    timeLimitSeconds: 180,
+    id: 'general-knowledge',
+    title: 'General Knowledge & Science',
+    category: 'General Studies',
+    badge: 'Trivia Champion',
+    icon: 'Globe',
+    description: 'Test your knowledge across world geography, science, history, and famous facts.',
+    timeLimitSeconds: 240,
     questions: [
       {
         id: 1,
-        question: 'What is the advantage of using asymmetric keys (RSA / EC) for signing JWTs in Single Sign-On?',
+        question: 'Which planet in our solar system is known as the "Red Planet"?',
         options: [
-          'Resource servers can verify tokens using the public key without needing secret sharing with the IdP',
-          'Asymmetric keys produce smaller JWT token string sizes',
-          'Asymmetric encryption eliminates the need for SSL/TLS',
-          'Asymmetric keys prevent tokens from expiring'
+          'Venus',
+          'Mars',
+          'Jupiter',
+          'Saturn'
+        ],
+        correctAnswer: 1,
+        explanation: 'Mars gets its reddish appearance from iron oxide (rust) on its surface.'
+      },
+      {
+        id: 2,
+        question: 'What is the chemical symbol for Gold?',
+        options: [
+          'Ag',
+          'Fe',
+          'Au',
+          'Gd'
+        ],
+        correctAnswer: 2,
+        explanation: 'The chemical symbol for Gold is Au, derived from the Latin word aurum.'
+      },
+      {
+        id: 3,
+        question: 'What is the largest ocean on Earth?',
+        options: [
+          'Atlantic Ocean',
+          'Indian Ocean',
+          'Arctic Ocean',
+          'Pacific Ocean'
+        ],
+        correctAnswer: 3,
+        explanation: 'The Pacific Ocean is the largest and deepest ocean basin on Earth.'
+      },
+      {
+        id: 4,
+        question: 'Who wrote the famous play "Romeo and Juliet"?',
+        options: [
+          'Charles Dickens',
+          'William Shakespeare',
+          'Mark Twain',
+          'Jane Austen'
+        ],
+        correctAnswer: 1,
+        explanation: '"Romeo and Juliet" is a famous tragedy written by William Shakespeare.'
+      },
+      {
+        id: 5,
+        question: 'Which gas do plants absorb from the atmosphere during photosynthesis?',
+        options: [
+          'Oxygen',
+          'Carbon Dioxide',
+          'Nitrogen',
+          'Hydrogen'
+        ],
+        correctAnswer: 1,
+        explanation: 'Plants absorb Carbon Dioxide (CO2) and water to produce glucose and release Oxygen.'
+      }
+    ]
+  },
+  {
+    id: 'basic-mathematics',
+    title: 'Basic Mathematics & Aptitude',
+    category: 'Mathematics',
+    badge: 'Math Wizard',
+    icon: 'Calculator',
+    description: 'Solve arithmetic problems, percentages, geometry, and numerical reasoning questions.',
+    timeLimitSeconds: 240,
+    questions: [
+      {
+        id: 1,
+        question: 'What is the value of (15 × 4) - 20?',
+        options: [
+          '40',
+          '50',
+          '60',
+          '30'
         ],
         correctAnswer: 0,
-        explanation: 'With asymmetric signing (like RS256), the IdP signs with a private key, and any resource server can verify using the published public JWKS key.'
+        explanation: '15 × 4 = 60, then 60 - 20 = 40.'
+      },
+      {
+        id: 2,
+        question: 'What is 25% of 200?',
+        options: [
+          '25',
+          '50',
+          '75',
+          '100'
+        ],
+        correctAnswer: 1,
+        explanation: '25% = 0.25. 0.25 × 200 = 50.'
+      },
+      {
+        id: 3,
+        question: 'What is the square root of 144?',
+        options: [
+          '10',
+          '11',
+          '12',
+          '14'
+        ],
+        correctAnswer: 2,
+        explanation: '12 × 12 = 144, so the square root is 12.'
+      },
+      {
+        id: 4,
+        question: 'If a triangle has angles measuring 60° and 70°, what is the measure of the third angle?',
+        options: [
+          '50°',
+          '60°',
+          '70°',
+          '90°'
+        ],
+        correctAnswer: 0,
+        explanation: 'The sum of angles in a triangle is 180°. 180° - (60° + 70°) = 50°.'
+      },
+      {
+        id: 5,
+        question: 'What is the next number in the sequence: 2, 4, 8, 16, ___?',
+        options: [
+          '24',
+          '30',
+          '32',
+          '64'
+        ],
+        correctAnswer: 2,
+        explanation: 'Each number doubles the previous number (16 × 2 = 32).'
       }
     ]
   }
@@ -227,9 +406,9 @@ const QUIZZES = [
 
 // Global Leaderboard Mock Store
 let LEADERBOARD = [
-  { name: 'Alex Johnson', email: 'alex@company.com', score: 100, badge: 'OIDC Architect', date: '2026-07-20' },
-  { name: 'Maria Garcia', email: 'maria@company.com', score: 90, badge: 'JS Specialist', date: '2026-07-19' },
-  { name: 'Devin Smith', email: 'devin@company.com', score: 85, badge: 'Systems Specialist', date: '2026-07-18' }
+  { name: 'Alex Johnson', email: 'alex@company.com', score: 100, badge: 'Python Developer', date: '2026-07-20' },
+  { name: 'Maria Garcia', email: 'maria@company.com', score: 100, badge: 'Java Architect', date: '2026-07-19' },
+  { name: 'Devin Smith', email: 'devin@company.com', score: 80, badge: 'Math Wizard', date: '2026-07-18' }
 ];
 
 app.get('/api/quizzes', (req, res) => {
