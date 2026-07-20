@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function App() {
   const [session, setSession] = useState({ authenticated: false, user: null, history: [] });
@@ -14,6 +14,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('quizzes'); // 'quizzes', 'leaderboard', 'history'
   const [appSwitcherOpen, setAppSwitcherOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
+  const autoNextTimerRef = useRef(null);
 
   // Modal State for Unauthenticated User
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -40,6 +41,44 @@ export default function App() {
     }, 1000);
     return () => clearInterval(timer);
   }, [activeQuiz, timeLeft]);
+
+  // Clean up auto-next timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autoNextTimerRef.current) {
+        clearTimeout(autoNextTimerRef.current);
+      }
+    };
+  }, []);
+
+  const requestFullscreenMode = () => {
+    try {
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(() => {});
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen();
+      }
+    } catch (err) {
+      console.log('Fullscreen request ignored:', err);
+    }
+  };
+
+  const exitFullscreenMode = () => {
+    try {
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    } catch (err) {
+      console.log('Exit fullscreen ignored:', err);
+    }
+  };
 
   const fetchSession = async () => {
     try {
@@ -79,13 +118,21 @@ export default function App() {
       setShowAuthModal(true);
       return;
     }
+    if (autoNextTimerRef.current) clearTimeout(autoNextTimerRef.current);
+    requestFullscreenMode();
     setActiveQuiz(quiz);
     setCurrentQuestionIndex(0);
     setSelectedOption(null);
     setIsAnswered(false);
     setAnswers({});
     setQuizResult(null);
-    setTimeLeft(quiz.timeLimitSeconds || 180);
+    setTimeLeft(quiz.timeLimitSeconds || 240);
+  };
+
+  const cancelQuiz = () => {
+    if (autoNextTimerRef.current) clearTimeout(autoNextTimerRef.current);
+    exitFullscreenMode();
+    setActiveQuiz(null);
   };
 
   const handleOptionClick = (optIdx) => {
@@ -95,10 +142,25 @@ export default function App() {
 
     const currentQ = activeQuiz.questions[currentQuestionIndex];
     setAnswers(prev => ({ ...prev, [currentQ.id]: optIdx }));
+
+    // Clear existing timer if any
+    if (autoNextTimerRef.current) {
+      clearTimeout(autoNextTimerRef.current);
+    }
+
+    // Automatically transition to the next question after 2 seconds (2000ms)
+    autoNextTimerRef.current = setTimeout(() => {
+      handleNextQuestion();
+    }, 2000);
   };
 
   const handleNextQuestion = () => {
     if (!activeQuiz) return;
+
+    if (autoNextTimerRef.current) {
+      clearTimeout(autoNextTimerRef.current);
+      autoNextTimerRef.current = null;
+    }
 
     if (currentQuestionIndex < activeQuiz.questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
@@ -111,6 +173,8 @@ export default function App() {
 
   const handleQuizSubmit = async () => {
     if (!activeQuiz) return;
+    if (autoNextTimerRef.current) clearTimeout(autoNextTimerRef.current);
+    exitFullscreenMode();
 
     try {
       const res = await fetch('/api/submit-quiz', {
@@ -119,7 +183,7 @@ export default function App() {
         body: JSON.stringify({
           quizId: activeQuiz.id,
           userAnswers: answers,
-          timeSpent: (activeQuiz.timeLimitSeconds || 180) - timeLeft
+          timeSpent: (activeQuiz.timeLimitSeconds || 240) - timeLeft
         })
       });
 
@@ -163,155 +227,157 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-purple-600 selection:text-white">
-      {/* Navbar */}
-      <nav className="glass-nav sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/20 font-bold text-white text-xl">
-              EH
+      {/* Navbar (hidden during active quiz mode for immersive full-screen experience) */}
+      {!activeQuiz && (
+        <nav className="glass-nav sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/20 font-bold text-white text-xl">
+                EH
+              </div>
+              <div>
+                <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-400 bg-clip-text text-transparent">
+                  EvalHub
+                </span>
+                <span className="text-xs ml-2 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 font-semibold">
+                  SSO Client C
+                </span>
+              </div>
             </div>
-            <div>
-              <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-purple-400 via-indigo-300 to-cyan-400 bg-clip-text text-transparent">
-                EvalHub
-              </span>
-              <span className="text-xs ml-2 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 font-semibold">
-                SSO Client C
-              </span>
-            </div>
-          </div>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center gap-1 ml-6 bg-slate-900/60 p-1 rounded-xl border border-slate-800">
-            <button
-              onClick={() => { setActiveTab('quizzes'); setActiveQuiz(null); setQuizResult(null); }}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                activeTab === 'quizzes' ? 'bg-purple-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Assessments
-            </button>
-            <button
-              onClick={() => { setActiveTab('leaderboard'); setActiveQuiz(null); setQuizResult(null); }}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                activeTab === 'leaderboard' ? 'bg-purple-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Leaderboard
-            </button>
-            {session.authenticated && (
+            {/* Navigation Links */}
+            <div className="hidden md:flex items-center gap-1 ml-6 bg-slate-900/60 p-1 rounded-xl border border-slate-800">
               <button
-                onClick={() => { setActiveTab('history'); setActiveQuiz(null); setQuizResult(null); }}
+                onClick={() => { setActiveTab('quizzes'); setActiveQuiz(null); setQuizResult(null); }}
                 className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                  activeTab === 'history' ? 'bg-purple-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+                  activeTab === 'quizzes' ? 'bg-purple-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                My Badges
+                Assessments
               </button>
-            )}
-          </div>
-        </div>
-
-        {/* SSO App Switcher & User Profile / Login */}
-        <div className="flex items-center gap-3">
-          {/* SSO Suite Switcher Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setAppSwitcherOpen(!appSwitcherOpen)}
-              className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-purple-500/40 text-xs font-semibold text-slate-300 flex items-center gap-2 transition-all"
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              SSO Suite Apps
-              <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            {appSwitcherOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-2 z-50">
-                <div className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold px-3 py-1.5">
-                  Connected Single Sign-On Apps
-                </div>
-                <a
-                  href="https://localhost:5000/admin/dashboard"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 text-sm font-medium transition-all"
-                >
-                  <div className="w-7 h-7 rounded bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs">IDP</div>
-                  <div>
-                    <div className="font-semibold">Identity Provider</div>
-                    <div className="text-xs text-slate-500">Port 5000 (Central Auth)</div>
-                  </div>
-                </a>
-                <a
-                  href="https://localhost:6030"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 text-sm font-medium transition-all"
-                >
-                  <div className="w-7 h-7 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">ELMS</div>
-                  <div>
-                    <div className="font-semibold">ELMS Platform</div>
-                    <div className="text-xs text-slate-500">Port 6030 (Client A)</div>
-                  </div>
-                </a>
-                <a
-                  href="https://localhost:5002"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 text-sm font-medium transition-all"
-                >
-                  <div className="w-7 h-7 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">TS</div>
-                  <div>
-                    <div className="font-semibold">TypeSprint</div>
-                    <div className="text-xs text-slate-500">Port 5002 (Client B)</div>
-                  </div>
-                </a>
-                <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-purple-900/30 border border-purple-500/30 text-purple-200 text-sm font-medium">
-                  <div className="w-7 h-7 rounded bg-purple-500 text-white flex items-center justify-center font-bold text-xs">EH</div>
-                  <div>
-                    <div className="font-semibold">EvalHub (Current)</div>
-                    <div className="text-xs text-purple-300/70">Port 5003 (Client C)</div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {session.authenticated ? (
-            <div className="flex items-center gap-3">
-              <div className="text-right hidden sm:block">
-                <div className="text-sm font-bold text-slate-100">{session.user.name || 'SSO User'}</div>
-                <div className="text-xs text-purple-400">{session.user.email}</div>
-              </div>
-              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center font-bold text-white shadow-md">
-                {(session.user.name || session.user.email || 'U')[0].toUpperCase()}
-              </div>
-              <a
-                href="/logout"
-                className="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 text-xs font-semibold transition-all"
+              <button
+                onClick={() => { setActiveTab('leaderboard'); setActiveQuiz(null); setQuizResult(null); }}
+                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                  activeTab === 'leaderboard' ? 'bg-purple-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+                }`}
               >
-                Logout
-              </a>
+                Leaderboard
+              </button>
+              {session.authenticated && (
+                <button
+                  onClick={() => { setActiveTab('history'); setActiveQuiz(null); setQuizResult(null); }}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                    activeTab === 'history' ? 'bg-purple-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  My Badges
+                </button>
+              )}
             </div>
-          ) : (
-            <a
-              href="/login"
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-purple-600/30 transition-all flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-              </svg>
-              Login with SSO
-            </a>
-          )}
-        </div>
-      </nav>
+          </div>
+
+          {/* SSO App Switcher & User Profile / Login */}
+          <div className="flex items-center gap-3">
+            {/* SSO Suite Switcher Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setAppSwitcherOpen(!appSwitcherOpen)}
+                className="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 hover:border-purple-500/40 text-xs font-semibold text-slate-300 flex items-center gap-2 transition-all"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                SSO Suite Apps
+                <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {appSwitcherOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl p-2 z-50">
+                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-extrabold px-3 py-1.5">
+                    Connected Single Sign-On Apps
+                  </div>
+                  <a
+                    href="https://localhost:5000/admin/dashboard"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 text-sm font-medium transition-all"
+                  >
+                    <div className="w-7 h-7 rounded bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs">IDP</div>
+                    <div>
+                      <div className="font-semibold">Identity Provider</div>
+                      <div className="text-xs text-slate-500">Port 5000 (Central Auth)</div>
+                    </div>
+                  </a>
+                  <a
+                    href="https://localhost:6030"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 text-sm font-medium transition-all"
+                  >
+                    <div className="w-7 h-7 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">ELMS</div>
+                    <div>
+                      <div className="font-semibold">ELMS Platform</div>
+                      <div className="text-xs text-slate-500">Port 6030 (Client A)</div>
+                    </div>
+                  </a>
+                  <a
+                    href="https://localhost:5002"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-200 text-sm font-medium transition-all"
+                  >
+                    <div className="w-7 h-7 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">TS</div>
+                    <div>
+                      <div className="font-semibold">TypeSprint</div>
+                      <div className="text-xs text-slate-500">Port 5002 (Client B)</div>
+                    </div>
+                  </a>
+                  <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-purple-900/30 border border-purple-500/30 text-purple-200 text-sm font-medium">
+                    <div className="w-7 h-7 rounded bg-purple-500 text-white flex items-center justify-center font-bold text-xs">EH</div>
+                    <div>
+                      <div className="font-semibold">EvalHub (Current)</div>
+                      <div className="text-xs text-purple-300/70">Port 5003 (Client C)</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {session.authenticated ? (
+              <div className="flex items-center gap-3">
+                <div className="text-right hidden sm:block">
+                  <div className="text-sm font-bold text-slate-100">{session.user.name || 'SSO User'}</div>
+                  <div className="text-xs text-purple-400">{session.user.email}</div>
+                </div>
+                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center font-bold text-white shadow-md">
+                  {(session.user.name || session.user.email || 'U')[0].toUpperCase()}
+                </div>
+                <a
+                  href="/logout"
+                  className="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 text-xs font-semibold transition-all"
+                >
+                  Logout
+                </a>
+              </div>
+            ) : (
+              <a
+                href="/login"
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-sm shadow-lg shadow-purple-600/30 transition-all flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+                Login with SSO
+              </a>
+            )}
+          </div>
+        </nav>
+      )}
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
+      <main className={`flex-1 max-w-6xl w-full mx-auto px-6 ${activeQuiz ? 'py-4 flex flex-col justify-center min-h-screen' : 'py-8'}`}>
         {/* Banner if not logged in */}
-        {!session.authenticated && (
+        {!session.authenticated && !activeQuiz && (
           <div className="mb-8 p-6 rounded-2xl glass-card border border-purple-500/30 bg-gradient-to-r from-purple-900/20 via-slate-900 to-indigo-900/20 flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-bold text-purple-200">Single Sign-On Authentication Required</h2>
@@ -328,79 +394,84 @@ export default function App() {
           </div>
         )}
 
-        {/* Enhanced Interactive Quiz Player Screen (Single Question per View + 4 Square Option Cards) */}
+        {/* Immersive Fullscreen Quiz Player View */}
         {activeQuiz ? (
-          <div className="glass-card rounded-3xl p-8 border border-purple-500/30 relative flex flex-col justify-between min-h-[580px]">
-            {/* Top Bar: Progress & Time */}
+          <div className="glass-card rounded-3xl p-8 border border-purple-500/40 relative flex flex-col justify-between min-h-[82vh] shadow-2xl animate-slide-up">
+            {/* Top Bar: Title, Progress & Time */}
             <div>
-              <div className="flex items-center justify-between border-b border-slate-800 pb-6 mb-6">
-                <div>
-                  <span className="text-xs uppercase tracking-wider font-extrabold text-purple-400">{activeQuiz.category}</span>
-                  <h2 className="text-xl font-extrabold text-white mt-0.5">{activeQuiz.title}</h2>
+              <div className="flex items-center justify-between border-b border-slate-800/80 pb-5 mb-6">
+                <div className="flex items-center gap-3">
+                  <span className="px-3 py-1 rounded-full text-xs uppercase tracking-wider font-extrabold bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                    {activeQuiz.category}
+                  </span>
+                  <h2 className="text-xl md:text-2xl font-extrabold text-white tracking-tight">{activeQuiz.title}</h2>
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="px-4 py-2 rounded-xl bg-purple-950/80 border border-purple-500/30 text-purple-300 font-mono font-bold text-lg">
+                <div className="flex items-center gap-3">
+                  <div className="px-4 py-2 rounded-xl bg-purple-950/90 border border-purple-500/40 text-purple-300 font-mono font-extrabold text-lg shadow-lg">
                     ⏱️ {formatTime(timeLeft)}
                   </div>
                   <button
-                    onClick={() => setActiveQuiz(null)}
-                    className="text-slate-400 hover:text-slate-200 text-sm font-semibold px-3 py-1.5 rounded-lg border border-slate-800 transition-colors"
+                    onClick={cancelQuiz}
+                    className="text-slate-400 hover:text-red-400 text-xs font-bold px-3.5 py-2 rounded-xl border border-slate-800 hover:border-red-500/30 transition-all bg-slate-900/60"
                   >
-                    Cancel
+                    Exit Fullscreen ✕
                   </button>
                 </div>
               </div>
 
-              {/* Progress Indicator */}
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-400 mb-2">
+              {/* Progress Bar */}
+              <div className="flex items-center justify-between text-xs font-bold text-slate-400 mb-2">
                 <span>Question {currentQuestionIndex + 1} of {activeQuiz.questions.length}</span>
-                <span className="text-purple-400 font-bold">
+                <span className="text-purple-400">
                   {Math.round(((currentQuestionIndex + 1) / activeQuiz.questions.length) * 100)}% Completed
                 </span>
               </div>
-              <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800 mb-8">
+              <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800 mb-8 shadow-inner">
                 <div
                   className="h-full bg-gradient-to-r from-purple-600 via-indigo-500 to-cyan-400 transition-all duration-500 ease-out"
                   style={{ width: `${((currentQuestionIndex + 1) / activeQuiz.questions.length) * 100}%` }}
                 ></div>
               </div>
 
-              {/* Question Text */}
+              {/* Current Question Title */}
               {(() => {
                 const currentQ = activeQuiz.questions[currentQuestionIndex];
                 return (
                   <div>
-                    <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800/80 text-center mb-8 shadow-inner">
-                      <h3 className="text-2xl md:text-3xl font-extrabold text-white leading-relaxed">
+                    <div className="p-6 md:p-8 rounded-2xl bg-slate-900/90 border border-slate-800 text-center mb-8 shadow-2xl">
+                      <h3 className="text-2xl md:text-3xl font-extrabold text-white leading-relaxed tracking-tight">
                         {currentQ.question}
                       </h3>
                     </div>
 
-                    {/* 4 Square Cards Layout for Options (2x2 Grid) */}
+                    {/* Animated 4 Square Cards Layout for Options (2x2 Grid) */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
                       {currentQ.options.map((optionText, optIdx) => {
                         const badgeInfo = OPTION_BADGES[optIdx % 4];
                         const isCorrect = optIdx === currentQ.correctAnswer;
                         const isSelected = selectedOption === optIdx;
 
-                        let cardStyle = 'bg-slate-900/90 border-slate-800/90 text-slate-200 hover:border-purple-500/60 hover:bg-slate-800/90 cursor-pointer hover:-translate-y-1';
+                        let cardStyle = 'bg-slate-900/90 border-slate-800 text-slate-200 hover:border-purple-500/60 hover:bg-slate-800/90 cursor-pointer hover:-translate-y-1 hover:shadow-purple-500/10';
                         let badgeContent = <span className="font-bold">{badgeInfo.symbol} {badgeInfo.label}</span>;
                         let badgeStyle = badgeInfo.bg;
+                        let animationClass = '';
 
                         if (isAnswered) {
                           if (isCorrect) {
-                            // Turn GREEN if correct
-                            cardStyle = 'bg-emerald-950/90 border-2 border-emerald-400 text-emerald-100 shadow-2xl shadow-emerald-500/30 scale-[1.02]';
+                            // Turn GREEN with elastic pop & glowing pulse
+                            cardStyle = 'bg-emerald-950/90 border-2 border-emerald-400 text-emerald-100 shadow-2xl shadow-emerald-500/40 scale-[1.02]';
                             badgeContent = <span>✓ CORRECT</span>;
                             badgeStyle = 'bg-emerald-500 text-slate-950 border-emerald-400 font-extrabold';
+                            animationClass = 'animate-card-pop animate-correct-pulse';
                           } else if (isSelected) {
-                            // Turn RED if selected incorrectly
-                            cardStyle = 'bg-red-950/90 border-2 border-red-500 text-red-100 shadow-2xl shadow-red-500/30';
+                            // Turn RED with subtle shake effect
+                            cardStyle = 'bg-red-950/90 border-2 border-red-500 text-red-100 shadow-2xl shadow-red-500/40';
                             badgeContent = <span>✗ INCORRECT</span>;
                             badgeStyle = 'bg-red-500 text-white border-red-400 font-extrabold';
+                            animationClass = 'animate-wrong-shake';
                           } else {
-                            // Dim unselected options
-                            cardStyle = 'opacity-35 bg-slate-950 border-slate-900 text-slate-500 cursor-not-allowed';
+                            // Dim non-selected wrong options
+                            cardStyle = 'opacity-30 bg-slate-950 border-slate-900 text-slate-600 cursor-not-allowed';
                           }
                         }
 
@@ -408,20 +479,20 @@ export default function App() {
                           <div
                             key={optIdx}
                             onClick={() => handleOptionClick(optIdx)}
-                            className={`p-6 rounded-2xl border flex flex-col justify-between min-h-[140px] transition-all duration-300 relative group ${cardStyle}`}
+                            className={`p-6 rounded-2xl border flex flex-col justify-between min-h-[140px] transition-all duration-300 relative group shadow-xl ${cardStyle} ${animationClass}`}
                           >
                             <div className="flex items-center justify-between mb-3">
-                              <span className={`px-3 py-1 rounded-xl text-xs border font-mono tracking-wider transition-all ${badgeStyle}`}>
+                              <span className={`px-3.5 py-1 rounded-xl text-xs border font-mono tracking-wider transition-all shadow-md ${badgeStyle}`}>
                                 {badgeContent}
                               </span>
                               {isAnswered && isCorrect && (
-                                <span className="text-emerald-400 text-xl font-bold animate-bounce">✓</span>
+                                <span className="text-emerald-400 text-2xl font-black animate-bounce">✓</span>
                               )}
                               {isAnswered && isSelected && !isCorrect && (
-                                <span className="text-red-400 text-xl font-bold animate-pulse">✗</span>
+                                <span className="text-red-400 text-2xl font-black animate-pulse">✗</span>
                               )}
                             </div>
-                            <div className="text-lg font-bold leading-snug">
+                            <div className="text-lg md:text-xl font-bold leading-snug">
                               {optionText}
                             </div>
                           </div>
@@ -429,12 +500,12 @@ export default function App() {
                       })}
                     </div>
 
-                    {/* Instant Feedback & Explanation Banner */}
+                    {/* Animated Explanation Banner */}
                     {isAnswered && (
-                      <div className={`p-5 rounded-2xl border mb-6 animate-fade-in transition-all ${
+                      <div className={`p-5 rounded-2xl border mb-6 animate-slide-up transition-all shadow-xl ${
                         selectedOption === currentQ.correctAnswer
-                          ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-200'
-                          : 'bg-red-950/60 border-red-500/40 text-red-200'
+                          ? 'bg-emerald-950/70 border-emerald-500/40 text-emerald-200'
+                          : 'bg-red-950/70 border-red-500/40 text-red-200'
                       }`}>
                         <div className="font-extrabold text-sm flex items-center gap-2 mb-1">
                           {selectedOption === currentQ.correctAnswer ? (
@@ -444,7 +515,7 @@ export default function App() {
                           )}
                         </div>
                         <p className="text-xs text-slate-300 leading-relaxed">
-                          💡 <span className="font-semibold text-white">Explanation:</span> {currentQ.explanation}
+                          💡 <span className="font-bold text-white">Explanation:</span> {currentQ.explanation}
                         </p>
                       </div>
                     )}
@@ -453,26 +524,32 @@ export default function App() {
               })()}
             </div>
 
-            {/* Next / Submit Navigation Button */}
-            <div className="mt-6 border-t border-slate-800 pt-6 flex items-center justify-between">
-              <div className="text-xs text-slate-400">
-                {isAnswered ? 'Select Next Question to continue.' : 'Click one of the 4 option cards above to submit your answer.'}
+            {/* Next / Finish Action Bar & Auto-Advance Progress */}
+            <div className="mt-6 border-t border-slate-800/80 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-xs text-slate-400 font-medium">
+                {isAnswered ? (
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-purple-400 animate-ping"></span>
+                    <span className="text-purple-300 font-bold">⚡ Next question in 2 seconds...</span>
+                  </div>
+                ) : (
+                  <span>Tap one of the 4 option cards above to submit your answer.</span>
+                )}
               </div>
 
               {isAnswered && (
                 <button
                   onClick={handleNextQuestion}
-                  className="px-8 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-base shadow-xl shadow-purple-600/30 transition-all flex items-center gap-2 animate-bounce"
+                  className="px-8 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-sm shadow-2xl shadow-purple-600/40 transition-all flex items-center gap-2 cursor-pointer"
                 >
-                  <span>{currentQuestionIndex < activeQuiz.questions.length - 1 ? 'Next Question' : 'Finish Assessment'}</span>
-                  <span>➔</span>
+                  <span>{currentQuestionIndex < activeQuiz.questions.length - 1 ? 'Skip Wait ➔' : 'Finish Now ➔'}</span>
                 </button>
               )}
             </div>
           </div>
         ) : quizResult ? (
           /* Quiz Results View */
-          <div className="glass-card rounded-3xl p-8 border border-purple-500/30 text-center max-w-2xl mx-auto">
+          <div className="glass-card rounded-3xl p-8 border border-purple-500/30 text-center max-w-2xl mx-auto animate-slide-up">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-500 shadow-xl mb-4 text-3xl">
               {quizResult.result.passed ? '🎉' : '📚'}
             </div>
@@ -537,7 +614,7 @@ export default function App() {
                   </p>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {quizzes.map(quiz => (
                     <div
                       key={quiz.id}
@@ -562,11 +639,11 @@ export default function App() {
 
                       <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between">
                         <div className="text-xs text-emerald-400 font-medium">
-                          🏆 Badge: <span className="font-bold">{quiz.badge}</span>
+                          🏆 <span className="font-bold">{quiz.badge}</span>
                         </div>
                         <button
                           onClick={() => startQuiz(quiz)}
-                          className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-all"
+                          className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs shadow-md shadow-purple-600/20 transition-all cursor-pointer"
                         >
                           Start Quiz
                         </button>
@@ -701,9 +778,11 @@ export default function App() {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 py-6 px-6 text-center text-xs text-slate-400">
-        EvalHub Portal — Single Sign-On via OIDC Central IdP (`https://localhost:5000`)
-      </footer>
+      {!activeQuiz && (
+        <footer className="border-t border-slate-900 py-6 px-6 text-center text-xs text-slate-400">
+          EvalHub Portal — Single Sign-On via OIDC Central IdP (`https://localhost:5000`)
+        </footer>
+      )}
     </div>
   );
 }
