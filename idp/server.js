@@ -49,7 +49,15 @@ async function startServer() {
         client_id: 'evalhub',
         client_secret: 'evalhub-secret-999',
         grant_types: ['authorization_code'],
-        redirect_uris: ['https://localhost:5003/callback'],
+        redirect_uris: ['https://localhost:5003/callback', 'https://localhost:5003/auth/callback'],
+        post_logout_redirect_uris: ['https://localhost:5003/'],
+        scope: 'openid email profile'
+      },
+      {
+        client_id: 'evalhub-client',
+        client_secret: 'evalhub-secret',
+        grant_types: ['authorization_code'],
+        redirect_uris: ['https://localhost:5003/auth/callback', 'https://localhost:5003/callback'],
         post_logout_redirect_uris: ['https://localhost:5003/'],
         scope: 'openid email profile'
       }

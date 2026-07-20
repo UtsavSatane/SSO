@@ -126,21 +126,40 @@ export default function App() {
     }
   };
 
-  const startQuiz = (quiz) => {
+  const startQuiz = async (quiz) => {
     if (!session.authenticated) {
       setSelectedQuizForAuth(quiz);
       setShowAuthModal(true);
       return;
     }
     if (autoNextTimerRef.current) clearTimeout(autoNextTimerRef.current);
-    requestFullscreenMode();
-    setActiveQuiz(quiz);
-    setCurrentQuestionIndex(0);
-    setSelectedOption(null);
-    setIsAnswered(false);
-    setAnswers({});
-    setQuizResult(null);
-    setTimeLeft(quiz.timeLimitSeconds || 240);
+
+    try {
+      const res = await fetch(`/api/quiz/${quiz.id}/questions`);
+      const data = await res.json();
+      const freshQuiz = {
+        ...quiz,
+        questions: data.questions && data.questions.length > 0 ? data.questions : quiz.questions
+      };
+      requestFullscreenMode();
+      setActiveQuiz(freshQuiz);
+      setCurrentQuestionIndex(0);
+      setSelectedOption(null);
+      setIsAnswered(false);
+      setAnswers({});
+      setQuizResult(null);
+      setTimeLeft(quiz.timeLimitSeconds || 240);
+    } catch (err) {
+      console.error('Failed to fetch dynamic questions:', err);
+      requestFullscreenMode();
+      setActiveQuiz(quiz);
+      setCurrentQuestionIndex(0);
+      setSelectedOption(null);
+      setIsAnswered(false);
+      setAnswers({});
+      setQuizResult(null);
+      setTimeLeft(quiz.timeLimitSeconds || 240);
+    }
   };
 
   const cancelQuiz = () => {
@@ -197,6 +216,7 @@ export default function App() {
         body: JSON.stringify({
           quizId: activeQuiz.id,
           userAnswers: answers,
+          submittedQuestions: activeQuiz.questions,
           timeSpent: (activeQuiz.timeLimitSeconds || 240) - timeLeft
         })
       });
