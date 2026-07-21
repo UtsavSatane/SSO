@@ -331,6 +331,6 @@ This project is intended for educational and learning purposes.
 
 **Utsav Satane**
 
-GitHub: https://github.com/yourusername
+GitHub: https://github.com/UtsavSatane
 
-LinkedIn: https://linkedin.com/in/yourprofile
+LinkedIn: [https://linkedin.com/in/yourprofile](https://www.linkedin.com/in/utsav-satane-a1b211291/)
